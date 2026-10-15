@@ -1,0 +1,1721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>USAT Cycling Lactate Zone Calculator & Training Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --usa-red: #E31837;
+  --usa-navy: #0C2340;
+  --bright-red: #CE1141;
+  --dark-blue: #13294B;
+  --steel-blue: #4B7C9B;
+  --light-gray: #D6D6D6;
+  --white: #FFFFFF;
+  --charcoal: #3E3E3E;
+  --zone1: #2E86AB;
+  --zone2: #48A9A6;
+  --zone3: #6DBE45;
+  --zone4: #F0C808;
+  --zone5: #F18F01;
+  --zone6: #E84855;
+  --zone7: #B91C1C;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Source Sans 3', sans-serif;
+  color: var(--charcoal);
+  background: #F4F5F7;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── HEADER ─── */
+.hero {
+  background: linear-gradient(135deg, var(--usa-navy) 0%, var(--dark-blue) 60%, var(--steel-blue) 100%);
+  color: var(--white);
+  padding: 2.5rem 1.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--usa-red), var(--bright-red), var(--usa-red));
+}
+.hero h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  letter-spacing: 3px;
+  line-height: 1.1;
+  margin-bottom: 0.3rem;
+}
+.hero p {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.1rem;
+  opacity: 0.85;
+  font-weight: 400;
+}
+
+/* ─── LAYOUT ─── */
+.container { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+/* ─── SECTION CARDS ─── */
+.section-card {
+  background: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(12,35,64,0.08);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(12,35,64,0.06);
+}
+.section-header {
+  background: var(--usa-navy);
+  color: var(--white);
+  padding: 0.9rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+.section-header:hover { background: var(--dark-blue); }
+.section-header h2 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.45rem;
+  letter-spacing: 2px;
+  flex: 1;
+}
+.section-header .step-badge {
+  background: var(--usa-red);
+  color: var(--white);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.1rem;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.section-header .chevron { transition: transform 0.3s; flex-shrink: 0; }
+.section-header.collapsed .chevron { transform: rotate(-90deg); }
+.section-body { padding: 1.5rem; transition: max-height 0.4s ease, opacity 0.3s; overflow: hidden; }
+.section-body.hidden { max-height: 0 !important; padding: 0 1.5rem; opacity: 0; }
+
+/* ─── FORMS ─── */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.form-group { display: flex; flex-direction: column; gap: 0.3rem; }
+.form-group label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--usa-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.form-group input, .form-group select {
+  padding: 0.6rem 0.8rem;
+  border: 2px solid var(--light-gray);
+  border-radius: 6px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-size: 1rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: var(--white);
+}
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: var(--steel-blue);
+  box-shadow: 0 0 0 3px rgba(75,124,155,0.15);
+}
+.form-group .help-text { font-size: 0.78rem; color: #777; font-style: italic; }
+
+/* ─── TOGGLE / TABS ─── */
+.input-toggle {
+  display: flex; gap: 0;
+  margin-bottom: 1.2rem;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid var(--usa-navy);
+}
+.input-toggle button {
+  flex: 1;
+  padding: 0.65rem 0.6rem;
+  border: none;
+  background: var(--white);
+  color: var(--usa-navy);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.input-toggle button.active { background: var(--usa-navy); color: var(--white); }
+.input-toggle button:hover:not(.active) { background: #e8edf2; }
+.toggle-panel { display: none; }
+.toggle-panel.active { display: block; }
+
+/* ─── BUTTONS ─── */
+.btn-calculate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 2rem;
+  background: linear-gradient(135deg, var(--usa-red), var(--bright-red));
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.25rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 3px 10px rgba(227,24,55,0.3);
+}
+.btn-calculate:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(227,24,55,0.4); }
+.btn-calculate:active { transform: translateY(0); }
+
+/* ─── RESULT BOXES ─── */
+.result-box {
+  background: linear-gradient(135deg, #f8f9fb, #eef1f5);
+  border-left: 4px solid var(--steel-blue);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  margin-top: 0.5rem;
+}
+.result-box.warn { border-left-color: #F0C808; background: linear-gradient(135deg, #fffef5, #fdf8e6); }
+.result-box.good { border-left-color: #6DBE45; background: linear-gradient(135deg, #f5fff0, #edfae6); }
+.result-box.alert { border-left-color: var(--usa-red); background: linear-gradient(135deg, #fff5f5, #fde6e6); }
+.result-label {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--usa-navy);
+  margin-bottom: 0.15rem;
+}
+.result-value {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 2rem;
+  color: var(--usa-navy);
+  letter-spacing: 1px;
+}
+.result-detail { font-size: 0.88rem; color: #555; margin-top: 0.2rem; }
+
+/* ─── INFO CALLOUTS ─── */
+.info-callout {
+  background: linear-gradient(135deg, #eef5fa, #e6eef5);
+  border-left: 4px solid var(--steel-blue);
+  border-radius: 0 8px 8px 0;
+  padding: 1rem 1.2rem;
+  margin: 1rem 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+.info-callout strong {
+  color: var(--usa-navy);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+}
+
+/* ─── ATHLETE TYPE SELECTOR ─── */
+.athlete-type-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+.athlete-type-btn {
+  padding: 1rem 0.8rem;
+  border: 2px solid var(--light-gray);
+  border-radius: 8px;
+  background: var(--white);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s;
+}
+.athlete-type-btn:hover { border-color: var(--steel-blue); }
+.athlete-type-btn.active { border-color: var(--usa-red); background: rgba(227,24,55,0.04); }
+.athlete-type-btn .type-label {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  color: var(--usa-navy);
+  letter-spacing: 1px;
+}
+.athlete-type-btn .type-detail { font-size: 0.78rem; color: #777; margin-top: 0.2rem; }
+
+/* ─── ZONE TABLE ─── */
+.zone-container { border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; }
+.zone-header-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 110px 120px 120px 90px 70px;
+  background: var(--usa-navy);
+  color: var(--white);
+  border-radius: 8px 8px 0 0;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.zone-header-row > div {
+  padding: 0.6rem 0.5rem;
+  display: flex; align-items: center; justify-content: center;
+}
+.zone-header-row > div:nth-child(2) { justify-content: flex-start; }
+.zone-row {
+  display: grid;
+  grid-template-columns: 70px 1fr 110px 120px 120px 90px 70px;
+  gap: 0;
+  border-bottom: 1px solid #eee;
+  align-items: stretch;
+  min-height: 60px;
+}
+.zone-row:last-child { border-bottom: none; }
+.zone-badge-cell { display: flex; align-items: center; justify-content: center; padding: 0.5rem; }
+.zone-badge {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  color: var(--white);
+  width: 48px; height: 48px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.zone-desc-cell { padding: 0.6rem 0.8rem; display: flex; flex-direction: column; justify-content: center; }
+.zone-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--usa-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.zone-explanation { font-size: 0.8rem; color: #555; line-height: 1.4; margin-top: 0.1rem; }
+.zone-metric-cell {
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--usa-navy);
+  padding: 0.4rem;
+  text-align: center;
+  line-height: 1.3;
+}
+.threshold-divider {
+  background: linear-gradient(90deg, transparent, var(--usa-navy), transparent);
+  height: 2px;
+  position: relative;
+}
+.threshold-label {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--white);
+  padding: 0.15rem 0.8rem;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.85rem;
+  color: var(--usa-red);
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+/* ─── STEP TABLE ─── */
+.step-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.88rem; }
+.step-table thead th {
+  background: var(--dark-blue);
+  color: var(--white);
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 600;
+  padding: 0.55rem 0.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+.step-table thead th:first-child { border-radius: 8px 0 0 0; }
+.step-table thead th:last-child { border-radius: 0 8px 0 0; }
+.step-table tbody td { padding: 0.3rem 0.25rem; text-align: center; border-bottom: 1px solid #eee; }
+.step-table input {
+  width: 70px; text-align: center; padding: 0.4rem 0.2rem;
+  border: 2px solid var(--light-gray); border-radius: 4px;
+  font-family: 'Source Sans 3', sans-serif; font-size: 0.9rem;
+}
+.step-table input:focus { outline: none; border-color: var(--steel-blue); box-shadow: 0 0 0 2px rgba(75,124,155,0.15); }
+
+/* ─── CHART ─── */
+.chart-container {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  margin: 1rem auto;
+  background: var(--white);
+  border-radius: 8px;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+}
+
+/* ─── ZONE SPECTRUM BAR ─── */
+.zone-spectrum {
+  display: flex; border-radius: 8px; overflow: hidden; height: 40px;
+  margin: 1rem 0 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.zone-spectrum-segment {
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif; font-size: 0.85rem;
+  color: var(--white); transition: flex-grow 0.3s;
+  cursor: default; position: relative;
+}
+.zone-spectrum-segment:hover { filter: brightness(1.1); }
+.spectrum-labels {
+  display: flex; justify-content: space-between;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.72rem; color: #666; margin-top: 0.3rem;
+}
+
+/* ─── OVERRIDE TOGGLE ─── */
+.override-row {
+  display: flex; align-items: center; gap: 0.5rem;
+  margin-top: 0.5rem; padding: 0.5rem 0.8rem;
+  background: #f8f9fb; border-radius: 6px;
+}
+.override-row label { font-size: 0.85rem; color: var(--usa-navy); font-weight: 600; font-family: 'Barlow Condensed', sans-serif; }
+.override-row input[type="number"] {
+  width: 80px; padding: 0.35rem 0.5rem; border: 2px solid var(--light-gray); border-radius: 4px;
+  font-family: 'Source Sans 3', sans-serif; font-size: 0.9rem;
+}
+.override-row input[type="checkbox"] { accent-color: var(--usa-red); width: 16px; height: 16px; cursor: pointer; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 768px) {
+  .zone-row { grid-template-columns: 60px 1fr; }
+  .zone-header-row { grid-template-columns: 60px 1fr; }
+  .zone-header-row > div:nth-child(n+3), .zone-metric-cell { display: none; }
+  .zone-desc-cell .mobile-metrics { display: block; }
+  .form-grid { grid-template-columns: 1fr; }
+  .athlete-type-grid { grid-template-columns: 1fr; }
+  .container { padding: 1rem 0.6rem; }
+  .input-toggle { flex-wrap: wrap; }
+  .input-toggle button { font-size: 0.78rem; padding: 0.5rem 0.4rem; }
+  .step-table input { width: 55px; font-size: 0.8rem; }
+}
+@media (min-width: 769px) { .zone-desc-cell .mobile-metrics { display: none; } }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.section-card { animation: fadeInUp 0.4s ease both; }
+.section-card:nth-child(2) { animation-delay: 0.05s; }
+.section-card:nth-child(3) { animation-delay: 0.1s; }
+.section-card:nth-child(4) { animation-delay: 0.15s; }
+.section-card:nth-child(5) { animation-delay: 0.2s; }
+
+/* ─── PRINT FOOTER ─── */
+.print-footer {
+  text-align: center;
+  padding: 2rem 1rem 1.5rem;
+  margin-top: 1rem;
+}
+.btn-print {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.85rem 2.5rem;
+  background: var(--usa-navy);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s;
+  box-shadow: 0 3px 12px rgba(12,35,64,0.25);
+}
+.btn-print:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(12,35,64,0.35); }
+.btn-print:active { transform: translateY(0); }
+.print-note {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.82rem;
+  color: #888;
+  margin-top: 0.6rem;
+}
+
+/* ─── PRINT ─── */
+@media print {
+  .hero { padding: 1rem; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .hero::after { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .section-body.hidden { max-height: none !important; padding: 1.5rem; opacity: 1; }
+  .btn-calculate, .input-toggle, .override-row, .print-footer, .info-callout { display: none; }
+  body { background: white; }
+  .section-card { break-inside: avoid; box-shadow: none; border: 1px solid #ccc; page-break-inside: avoid; }
+  .zone-container { break-inside: avoid; page-break-inside: avoid; }
+  .zone-badge, .zone-card-header, .section-header, .step-badge, .zone-spectrum-segment,
+  .threshold-divider, .threshold-label, .result-box, .result-box.good, .result-box.warn {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .zone-row { break-inside: avoid; }
+  .section-header { cursor: default; }
+  .chart-container { break-inside: avoid; page-break-inside: avoid; max-width: 100%; }
+  #sec-curve .section-body, #sec-summary .section-body, #sec-zones .section-body { padding: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div style="display:flex; align-items:center; justify-content:center; gap:1.2rem; flex-wrap:wrap;">
+    <img src="https://raw.githubusercontent.com/JustinTrolle/USAT-Images/52c71743566619c0f52cc1b80849691cba7c9f20/USA_Triathlon_Education_Logo_Transparent.png" alt="USA Triathlon Education" style="height:72px; width:auto; flex-shrink:0;">
+    <div>
+      <h1>Cycling Lactate Zone Calculator</h1>
+      <p>USA Triathlon — 7-Zone Power & Heart Rate Training System</p>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ═══════════ SECTION 1: ATHLETE METRICS ═══════════ -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggleSection('metrics')">
+      <span class="step-badge">1</span>
+      <h2>Athlete Metrics</h2>
+      <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="section-body" id="body-metrics">
+      <div class="info-callout">
+        Enter your body weight and maximum heart rate. These are used to calculate watts/kg zones and heart rate training zones.
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Body Weight</label>
+          <div style="display:flex; gap:0.4rem; align-items:center;">
+            <input type="number" id="body-weight" value="146" min="50" max="400" step="0.1" style="flex:1;">
+            <select id="weight-unit" style="width:70px; padding:0.6rem 0.3rem; border:2px solid var(--light-gray); border-radius:6px; font-family:'Source Sans 3',sans-serif;" onchange="updateWeightDisplay()">
+              <option value="lbs" selected>lbs</option>
+              <option value="kg">kg</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Maximum Heart Rate (bpm)</label>
+          <input type="number" id="max-hr" value="190" min="120" max="230">
+          <span class="help-text">Highest HR recorded or tested</span>
+        </div>
+        <div class="form-group">
+          <label>Z7 Ceiling (% of LT2 Power)</label>
+          <input type="number" id="z7-ceiling" value="150" min="120" max="200" step="5">
+          <span class="help-text">Default 150%. Adjusts VO2max zone top end.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SECTION 2: THRESHOLD INPUT ═══════════ -->
+  <div class="section-card">
+    <div class="section-header" onclick="toggleSection('input')">
+      <span class="step-badge">2</span>
+      <h2>Threshold Detection — Choose Your Input Method</h2>
+      <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="section-body" id="body-input">
+      <div class="input-toggle">
+        <button class="active" onclick="switchMode('test', this)">Full Lactate Test</button>
+        <button onclick="switchMode('ni', this)">Non-Invasive Step Test</button>
+        <button onclick="switchMode('manual', this)">Manual LT1 / LT2 / Peak</button>
+        <button onclick="switchMode('lt2only', this)">LT2 Only</button>
+      </div>
+
+      <!-- ── MODE A: Full Lactate Test ── -->
+      <div class="toggle-panel active" id="panel-test">
+        <div class="info-callout">
+          Enter your step-test data. <strong>LT1</strong> is auto-detected where lactate first rises &gt;0.2 mmol above baseline. <strong>LT2</strong> is interpolated at 4.0 mmol/L (OBLA). You can override either below.
+        </div>
+        <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+          <div class="form-group">
+            <label>Number of Steps</label>
+            <select id="num-steps" onchange="buildStepTable()">
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8" selected>8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Baseline Lactate (mmol/L)</label>
+            <input type="number" id="baseline-lac" value="1.6" min="0" max="5" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Starting Power (W)</label>
+            <input type="number" id="start-watts" value="80" min="0" step="10" onchange="prefillStepWatts()">
+          </div>
+          <div class="form-group">
+            <label>Step Increment (W)</label>
+            <input type="number" id="step-increment" value="20" min="5" step="5" onchange="prefillStepWatts()">
+          </div>
+        </div>
+        <div style="overflow-x:auto; margin-top:0.5rem;">
+          <table class="step-table" id="step-table">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Power (W)</th>
+                <th>Lactate (mmol/L)</th>
+                <th>Heart Rate (bpm)</th>
+                <th>RPE (1-10)</th>
+              </tr>
+            </thead>
+            <tbody id="step-table-body"></tbody>
+          </table>
+        </div>
+        <div class="override-row" style="margin-top:1rem;">
+          <input type="checkbox" id="override-lt1" onchange="toggleOverride('lt1')">
+          <label for="override-lt1">Override LT1 Power:</label>
+          <input type="number" id="override-lt1-val" value="" placeholder="Watts" disabled>
+          <span style="margin-left:1rem;"></span>
+          <input type="checkbox" id="override-lt2" onchange="toggleOverride('lt2')">
+          <label for="override-lt2">Override LT2 Power:</label>
+          <input type="number" id="override-lt2-val" value="" placeholder="Watts" disabled>
+        </div>
+      </div>
+
+      <!-- ── MODE A2: Non-Invasive Step Test (HR deflection) ── -->
+      <div class="toggle-panel" id="panel-ni">
+        <div class="info-callout">
+          No lactate meter needed. Enter the power, step duration, and heart rate for each step. <strong>LT2</strong> is auto-detected at the <strong>heart rate deflection point</strong> (where HR stops rising linearly with power). If no clear deflection is found, LT2 is estimated at the point roughly 6:30–7:00 before the end of the test. <strong>LT1</strong> is set as a percentage of LT2 based on your athlete category. You can override either below.
+        </div>
+        <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+          <div class="form-group">
+            <label>Number of Steps</label>
+            <select id="ni-num-steps" onchange="buildNIStepTable()">
+              <option value="10" selected>10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+              <option value="16">16</option>
+              <option value="17">17</option>
+              <option value="18">18</option>
+              <option value="19">19</option>
+              <option value="20">20</option>
+              <option value="21">21</option>
+              <option value="22">22</option>
+              <option value="23">23</option>
+              <option value="24">24</option>
+              <option value="25">25</option>
+              <option value="26">26</option>
+              <option value="27">27</option>
+              <option value="28">28</option>
+              <option value="29">29</option>
+              <option value="30">30</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Step Increment (W)</label>
+            <input type="number" id="ni-step-increment" value="20" min="5" step="5" onchange="prefillNIStepWatts()">
+            <span class="help-text">Fills power from Step 1 downward</span>
+          </div>
+        </div>
+        <div style="overflow-x:auto; margin-top:0.5rem;">
+          <table class="step-table" id="ni-step-table">
+            <thead>
+              <tr>
+                <th>Step</th>
+                <th>Power (W)</th>
+                <th>Step Duration (min)</th>
+                <th>Heart Rate (bpm)</th>
+                <th>RPE (1-10)</th>
+              </tr>
+            </thead>
+            <tbody id="ni-step-table-body"></tbody>
+          </table>
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:0.95rem; color:var(--usa-navy); text-transform:uppercase; letter-spacing:0.5px; margin:1rem 0 0.6rem;">Select Your Athlete Category (sets LT1 as % of LT2)</div>
+        <div class="athlete-type-grid">
+          <div class="athlete-type-btn active" data-type="ag" onclick="selectAthleteType('ag', this)">
+            <div class="type-label">Age-Group</div>
+            <div class="type-detail">LT1 = 70% of LT2 Power</div>
+          </div>
+          <div class="athlete-type-btn" data-type="perf" onclick="selectAthleteType('perf', this)">
+            <div class="type-label">Performance</div>
+            <div class="type-detail">LT1 = 75% of LT2 Power</div>
+          </div>
+          <div class="athlete-type-btn" data-type="elite" onclick="selectAthleteType('elite', this)">
+            <div class="type-label">Elite</div>
+            <div class="type-detail">LT1 = 80% of LT2 Power</div>
+          </div>
+        </div>
+        <div class="override-row" style="margin-top:1rem;">
+          <input type="checkbox" id="override-ni-lt1" onchange="toggleOverride('ni-lt1')">
+          <label for="override-ni-lt1">Override LT1 Power:</label>
+          <input type="number" id="override-ni-lt1-val" value="" placeholder="Watts" disabled>
+          <span style="margin-left:1rem;"></span>
+          <input type="checkbox" id="override-ni-lt2" onchange="toggleOverride('ni-lt2')">
+          <label for="override-ni-lt2">Override LT2 Power:</label>
+          <input type="number" id="override-ni-lt2-val" value="" placeholder="Watts" disabled>
+        </div>
+      </div>
+
+      <!-- ── MODE B: Manual Thresholds ── -->
+      <div class="toggle-panel" id="panel-manual">
+        <div class="info-callout">
+          Enter your known LT1, LT2, and peak power values directly. Optionally provide heart rate at each threshold for HR zone calculation.
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>LT1 Power (W)</label>
+            <input type="number" id="man-lt1-power" value="120" min="0">
+          </div>
+          <div class="form-group">
+            <label>LT2 / FTP Power (W)</label>
+            <input type="number" id="man-lt2-power" value="175" min="0">
+          </div>
+          <div class="form-group">
+            <label>Peak Power (W)</label>
+            <input type="number" id="man-peak-power" value="262" min="0">
+            <span class="help-text">1-min or 5-sec max power</span>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Heart Rate at LT1 (bpm)</label>
+            <input type="number" id="man-lt1-hr" value="140" min="60" max="230">
+          </div>
+          <div class="form-group">
+            <label>Heart Rate at LT2 (bpm)</label>
+            <input type="number" id="man-lt2-hr" value="167" min="60" max="230">
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MODE C: LT2 Only ── -->
+      <div class="toggle-panel" id="panel-lt2only">
+        <div class="info-callout">
+          Enter only your LT2 / FTP power. LT1 will be auto-estimated based on your athlete category, using the same proportional method as the USAT Run Zone Calculator.
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>LT2 / FTP Power (W)</label>
+            <input type="number" id="lt2only-power" value="175" min="0">
+          </div>
+          <div class="form-group">
+            <label>Threshold Heart Rate (bpm)</label>
+            <input type="number" id="lt2only-hr" value="167" min="60" max="230">
+            <span class="help-text">HR at LT2 / FTP</span>
+          </div>
+        </div>
+        <div style="font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:0.95rem; color:var(--usa-navy); text-transform:uppercase; letter-spacing:0.5px; margin:0.8rem 0 0.6rem;">Select Your Athlete Category</div>
+        <div class="athlete-type-grid">
+          <div class="athlete-type-btn active" data-type="ag" onclick="selectAthleteType('ag', this)">
+            <div class="type-label">Age-Group</div>
+            <div class="type-detail">LT1 = 70% of LT2 Power<br>LT1 HR = 83% of LTHR</div>
+          </div>
+          <div class="athlete-type-btn" data-type="perf" onclick="selectAthleteType('perf', this)">
+            <div class="type-label">Performance</div>
+            <div class="type-detail">LT1 = 75% of LT2 Power<br>LT1 HR = 86% of LTHR</div>
+          </div>
+          <div class="athlete-type-btn" data-type="elite" onclick="selectAthleteType('elite', this)">
+            <div class="type-label">Elite</div>
+            <div class="type-detail">LT1 = 80% of LT2 Power<br>LT1 HR = 89% of LTHR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ CALCULATE BUTTON ═══════════ -->
+  <div style="text-align:center; margin: 0.5rem 0 1.5rem;">
+    <button class="btn-calculate" onclick="calculateAll()">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2v16M2 10h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+      CALCULATE ZONES
+    </button>
+  </div>
+
+  <!-- ═══════════ SECTION 3: LACTATE CURVE (test mode only) ═══════════ -->
+  <div class="section-card" id="sec-curve" style="display:none;">
+    <div class="section-header" onclick="toggleSection('curve')">
+      <span class="step-badge">3</span>
+      <h2 id="curve-title">Lactate Curve & Threshold Detection</h2>
+      <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="section-body" id="body-curve">
+      <div class="chart-container">
+        <canvas id="lactate-chart"></canvas>
+      </div>
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:1rem; margin-top:1rem;" id="threshold-summary"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SECTION 4: THRESHOLD SUMMARY (all modes) ═══════════ -->
+  <div class="section-card" id="sec-summary" style="display:none;">
+    <div class="section-header" onclick="toggleSection('summary')">
+      <span class="step-badge" id="summary-badge">3</span>
+      <h2>Threshold Summary</h2>
+      <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="section-body" id="body-summary">
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:1rem;" id="summary-boxes"></div>
+      <!-- Zone Spectrum Bar -->
+      <div id="zone-spectrum-wrapper" style="margin-top:1.5rem;">
+        <div style="font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:0.9rem; color:var(--usa-navy); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:0.3rem;">Power Zone Spectrum (Watts)</div>
+        <div class="zone-spectrum" id="zone-spectrum"></div>
+        <div class="spectrum-labels" id="spectrum-labels"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SECTION 5: ZONE TABLE ═══════════ -->
+  <div class="section-card" id="sec-zones" style="display:none;">
+    <div class="section-header" onclick="toggleSection('zones')">
+      <span class="step-badge" id="zones-badge">4</span>
+      <h2>7-Zone Cycling Training Intensity Guide</h2>
+      <svg class="chevron" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M6 8l4 4 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+    <div class="section-body" id="body-zones">
+      <div class="info-callout">
+        <strong>Zone structure:</strong> Zones 1–2 are below LT1 (aerobic base). Zones 3–4 span LT1 to LT2 (threshold development). Zones 5–7 are above LT2 (high-intensity and neuromuscular power). Percent of LT2 / FTP, power, heart rate, watts/kg, and RPE ranges are shown for each zone. The percentage column uses whole numbers with no overlap between zones so it can be entered straight into TrainingPeaks.
+      </div>
+      <div class="zone-container" id="zone-chart"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════ PRINT FOOTER ═══════════ -->
+  <div class="print-footer">
+    <button class="btn-print" onclick="window.print()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      PRINT ZONE REPORT
+    </button>
+    <div class="print-note">Prints threshold summary, zone table, and lactate curve (if available). Input sections are hidden in print view.</div>
+  </div>
+
+</div><!-- container -->
+
+<script>
+// ─── GLOBALS ───
+let athleteType = 'ag';
+let currentMode = 'test';
+let lactateChart = null;
+const defaultStepData = [
+  { w:80, lac:1.6, hr:120, rpe:1 },
+  { w:100, lac:1.6, hr:120, rpe:1 },
+  { w:120, lac:1.8, hr:140, rpe:2 },
+  { w:140, lac:2.6, hr:151, rpe:3 },
+  { w:160, lac:3.4, hr:160, rpe:5 },
+  { w:180, lac:4.7, hr:170, rpe:7 },
+  { w:200, lac:7.0, hr:180, rpe:8 },
+  { w:220, lac:11.5, hr:186, rpe:10 }
+];
+// Non-invasive step test defaults (3-min steps, HR deflects around step 8)
+const defaultNIStepData = [
+  { w:80,  dur:3, hr:118, rpe:1 },
+  { w:100, dur:3, hr:128, rpe:2 },
+  { w:120, dur:3, hr:138, rpe:3 },
+  { w:140, dur:3, hr:148, rpe:4 },
+  { w:160, dur:3, hr:158, rpe:5 },
+  { w:180, dur:3, hr:167, rpe:6 },
+  { w:200, dur:3, hr:176, rpe:7 },
+  { w:220, dur:3, hr:183, rpe:8 },
+  { w:240, dur:3, hr:186, rpe:9 },
+  { w:260, dur:3, hr:188, rpe:10 }
+];
+// Time before the end of a non-invasive test where LT2 typically falls (6:30–7:00 → 6:45 midpoint)
+const NI_LT2_TIME_BEFORE_END_MIN = 6.75;
+const tierConfig = { ag: { pwr: 0.70, hr: 0.83 }, perf: { pwr: 0.75, hr: 0.86 }, elite: { pwr: 0.80, hr: 0.89 } };
+
+const zoneColors = ['var(--zone1)','var(--zone2)','var(--zone3)','var(--zone4)','var(--zone5)','var(--zone6)','var(--zone7)'];
+const zoneColorHex = ['#2E86AB','#48A9A6','#6DBE45','#F0C808','#F18F01','#E84855','#B91C1C'];
+const zoneData = [
+  { zone:1, name:'Recovery', explanation:'Very easy spinning promoting active recovery. Increases blood flow to muscles, enhances capillary development, and aids metabolic waste removal. Builds aerobic base without adding training stress. Ideal for recovery rides and warm-up/cool-down.' },
+  { zone:2, name:'Aerobic Extensive', explanation:'Comfortable endurance pace. Maximizes fat oxidation, develops mitochondrial density, strengthens cardiac stroke volume, and builds the aerobic engine. The majority of endurance training volume should occur here.' },
+  { zone:3, name:'Aerobic Intensive', explanation:'Steady effort above easy pace but below threshold. Improves aerobic efficiency, muscular endurance, and lactate clearance capacity. Good for tempo intervals and progressive endurance rides.' },
+  { zone:4, name:'Tempo / Sweet Spot', explanation:'Comfortably hard effort near lactate threshold. Raises the power at which lactate accumulates, improves lactate buffering, and trains the body to sustain harder efforts longer. Key zone for sweet spot and threshold intervals.' },
+  { zone:5, name:'Anaerobic Extensive', explanation:'Hard effort above LT2. Develops VO2max stimulus, increases cardiac output, and improves tolerance of high lactate levels. Typically trained through longer intervals (3–8 min) with active recovery.' },
+  { zone:6, name:'Anaerobic Intensive', explanation:'Very hard effort training anaerobic capacity. Improves maximal oxygen uptake, fast-twitch fiber recruitment, and the ability to sustain high-intensity surges. Trained through 1–5 min intervals at near-maximum effort.' },
+  { zone:7, name:'VO2max', explanation:'Maximum or near-maximum effort. Develops peak power, neuromuscular recruitment, and anaerobic power. Short explosive efforts (10–90 sec) with full recovery. Includes standing starts, short hill sprints, and max-effort intervals.' }
+];
+
+const rpeRanges = [
+  { low: 1, high: 2 },
+  { low: 2, high: 3 },
+  { low: 3, high: 4 },
+  { low: 4, high: 6 },
+  { low: 6, high: 7 },
+  { low: 7, high: 9 },
+  { low: 9, high: 10 }
+];
+
+// ─── UTILITIES ───
+function toggleSection(id) {
+  const body = document.getElementById('body-' + id);
+  const header = body.previousElementSibling;
+  body.classList.toggle('hidden');
+  header.classList.toggle('collapsed');
+}
+
+function switchMode(mode, btn) {
+  currentMode = mode;
+  document.querySelectorAll('#body-input .input-toggle button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  ['test','ni','manual','lt2only'].forEach(m => {
+    document.getElementById('panel-' + m).classList.toggle('active', m === mode);
+  });
+}
+
+function selectAthleteType(type, el) {
+  athleteType = type;
+  // Keep every athlete-category grid (NI panel and LT2 Only panel) in sync
+  document.querySelectorAll('.athlete-type-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.type === type);
+  });
+}
+
+function fmtTime(min) {
+  const totalSec = Math.round(min * 60);
+  const m = Math.floor(totalSec / 60), s = totalSec % 60;
+  return m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+function toggleOverride(which) {
+  const cb = document.getElementById('override-' + which);
+  const inp = document.getElementById('override-' + which + '-val');
+  inp.disabled = !cb.checked;
+  if (!cb.checked) inp.value = '';
+}
+
+function getWeightKg() {
+  const w = parseFloat(document.getElementById('body-weight').value) || 70;
+  return document.getElementById('weight-unit').value === 'lbs' ? w / 2.20462 : w;
+}
+
+function updateWeightDisplay() { /* no-op, weight is read at calc time */ }
+
+function round1(n) { return Math.round(n * 10) / 10; }
+
+// ─── BUILD STEP TABLE ───
+function buildStepTable() {
+  const n = parseInt(document.getElementById('num-steps').value) || 8;
+  const startW = parseInt(document.getElementById('start-watts').value) || 80;
+  const incr = parseInt(document.getElementById('step-increment').value) || 20;
+  const tbody = document.getElementById('step-table-body');
+  tbody.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const def = defaultStepData[i] || {};
+    const w = def.w || (startW + i * incr);
+    const lac = def.lac || '';
+    const hr = def.hr || '';
+    const rpe = def.rpe || '';
+    tbody.innerHTML += `<tr>
+      <td style="font-family:'Barlow Condensed',sans-serif; font-weight:600; color:var(--usa-navy);">${i + 1}</td>
+      <td><input type="number" id="step-w-${i}" value="${w}" min="0" step="10"></td>
+      <td><input type="number" id="step-lac-${i}" value="${lac}" min="0" step="0.1"></td>
+      <td><input type="number" id="step-hr-${i}" value="${hr}" min="0" step="1"></td>
+      <td><input type="number" id="step-rpe-${i}" value="${rpe}" min="0" max="10" step="1"></td>
+    </tr>`;
+  }
+}
+
+function prefillStepWatts() {
+  const n = parseInt(document.getElementById('num-steps').value) || 8;
+  const startW = parseInt(document.getElementById('start-watts').value) || 80;
+  const incr = parseInt(document.getElementById('step-increment').value) || 20;
+  for (let i = 0; i < n; i++) {
+    const el = document.getElementById('step-w-' + i);
+    if (el) el.value = startW + i * incr;
+  }
+}
+
+// ─── READ STEP DATA ───
+function readStepData() {
+  const n = parseInt(document.getElementById('num-steps').value) || 8;
+  const steps = [];
+  for (let i = 0; i < n; i++) {
+    const w = parseFloat(document.getElementById('step-w-' + i)?.value) || 0;
+    const lac = parseFloat(document.getElementById('step-lac-' + i)?.value) || 0;
+    const hr = parseFloat(document.getElementById('step-hr-' + i)?.value) || 0;
+    const rpe = parseFloat(document.getElementById('step-rpe-' + i)?.value) || 0;
+    if (w > 0 && lac > 0) steps.push({ w, lac, hr, rpe });
+  }
+  return steps;
+}
+
+// ─── INTERPOLATION ───
+function interpolatePowerAtLactate(steps, targetLac) {
+  for (let i = 1; i < steps.length; i++) {
+    if (steps[i].lac >= targetLac) {
+      const prev = steps[i - 1], curr = steps[i];
+      const frac = (targetLac - prev.lac) / (curr.lac - prev.lac);
+      return prev.w + frac * (curr.w - prev.w);
+    }
+  }
+  return steps[steps.length - 1].w; // above all steps
+}
+
+function interpolateHRAtPower(steps, targetW) {
+  for (let i = 1; i < steps.length; i++) {
+    if (steps[i].w >= targetW) {
+      const prev = steps[i - 1], curr = steps[i];
+      const frac = (targetW - prev.w) / (curr.w - prev.w);
+      return prev.hr + frac * (curr.hr - prev.hr);
+    }
+  }
+  // Extrapolate above
+  if (steps.length >= 2) {
+    const a = steps[steps.length - 2], b = steps[steps.length - 1];
+    const slope = (b.hr - a.hr) / (b.w - a.w);
+    return b.hr + slope * (targetW - b.w);
+  }
+  return steps[steps.length - 1].hr;
+}
+
+// ─── DETECT LT1 (baseline + 0.2) ───
+function detectLT1(steps, baseline) {
+  const target = baseline + 0.2;
+  for (let i = 1; i < steps.length; i++) {
+    if (steps[i].lac > target) {
+      // Interpolate
+      const prev = steps[i - 1], curr = steps[i];
+      if (prev.lac >= target) return prev.w;
+      const frac = (target - prev.lac) / (curr.lac - prev.lac);
+      return prev.w + frac * (curr.w - prev.w);
+    }
+  }
+  return steps[Math.floor(steps.length / 3)].w; // fallback
+}
+
+// ─── DETECT LT2 (4.0 mmol OBLA) ───
+function detectLT2(steps) {
+  return interpolatePowerAtLactate(steps, 4.0);
+}
+
+// ═══════════ NON-INVASIVE STEP TEST ═══════════
+
+// ─── BUILD NI STEP TABLE ───
+function buildNIStepTable() {
+  const n = parseInt(document.getElementById('ni-num-steps').value) || 10;
+  const incr = parseInt(document.getElementById('ni-step-increment').value) || 20;
+  const tbody = document.getElementById('ni-step-table-body');
+  const startW = defaultNIStepData[0].w;
+  tbody.innerHTML = '';
+  for (let i = 0; i < n; i++) {
+    const def = defaultNIStepData[i] || {};
+    const w = def.w || (startW + i * incr);
+    const dur = def.dur || 3;
+    const hr = def.hr || '';
+    const rpe = def.rpe || '';
+    tbody.innerHTML += `<tr>
+      <td style="font-family:'Barlow Condensed',sans-serif; font-weight:600; color:var(--usa-navy);">${i + 1}</td>
+      <td><input type="number" id="ni-step-w-${i}" value="${w}" min="0" step="10" ${i === 0 ? 'onchange="prefillNIStepWatts()"' : ''}></td>
+      <td><input type="number" id="ni-step-dur-${i}" value="${dur}" min="0.5" step="0.5"></td>
+      <td><input type="number" id="ni-step-hr-${i}" value="${hr}" min="0" step="1"></td>
+      <td><input type="number" id="ni-step-rpe-${i}" value="${rpe}" min="0" max="10" step="1"></td>
+    </tr>`;
+  }
+}
+
+// Fill power down from Step 1 using the increment
+function prefillNIStepWatts() {
+  const n = parseInt(document.getElementById('ni-num-steps').value) || 10;
+  const incr = parseInt(document.getElementById('ni-step-increment').value) || 20;
+  const startW = parseFloat(document.getElementById('ni-step-w-0')?.value) || defaultNIStepData[0].w;
+  for (let i = 1; i < n; i++) {
+    const el = document.getElementById('ni-step-w-' + i);
+    if (el) el.value = startW + i * incr;
+  }
+}
+
+// ─── READ NI STEP DATA (adds cumulative end time per step) ───
+function readNIStepData() {
+  const n = parseInt(document.getElementById('ni-num-steps').value) || 10;
+  const steps = [];
+  let tEnd = 0;
+  for (let i = 0; i < n; i++) {
+    const w = parseFloat(document.getElementById('ni-step-w-' + i)?.value) || 0;
+    const dur = parseFloat(document.getElementById('ni-step-dur-' + i)?.value) || 0;
+    const hr = parseFloat(document.getElementById('ni-step-hr-' + i)?.value) || 0;
+    const rpe = parseFloat(document.getElementById('ni-step-rpe-' + i)?.value) || 0;
+    if (w > 0 && dur > 0 && hr > 0) {
+      tEnd += dur;
+      steps.push({ w, dur, hr, rpe, tEnd });
+    }
+  }
+  return steps;
+}
+
+// Simple least-squares fit of HR vs power
+function linearFit(pts) {
+  const n = pts.length;
+  let sx = 0, sy = 0, sxx = 0, sxy = 0;
+  pts.forEach(p => { sx += p.w; sy += p.hr; sxx += p.w * p.w; sxy += p.w * p.hr; });
+  const denom = n * sxx - sx * sx;
+  const slope = denom === 0 ? 0 : (n * sxy - sx * sy) / denom;
+  const intercept = (sy - slope * sx) / n;
+  let sse = 0;
+  pts.forEach(p => { const r = p.hr - (slope * p.w + intercept); sse += r * r; });
+  return { slope, intercept, sse };
+}
+
+// ─── DETECT HR DEFLECTION POINT (Conconi-style two-segment fit) ───
+// Finds the breakpoint where a two-line fit of HR vs power has the least error,
+// and accepts it only if the upper segment is clearly flatter than the lower one.
+function detectHRDeflection(steps) {
+  const n = steps.length;
+  if (n < 6) return null;
+  let best = null;
+  for (let i = 2; i <= n - 3; i++) {
+    const lower = linearFit(steps.slice(0, i + 1));
+    const upper = linearFit(steps.slice(i));
+    const sse = lower.sse + upper.sse;
+    if (!best || sse < best.sse) best = { i, sse, lower, upper };
+  }
+  if (!best || best.lower.slope <= 0) return null;
+  if (best.upper.slope >= best.lower.slope * 0.8) return null; // no clear flattening
+  return { index: best.i, step: steps[best.i], lower: best.lower, upper: best.upper };
+}
+
+// Power at a given elapsed time, interpolating between step end-points
+function interpolatePowerAtTime(steps, t) {
+  if (t <= steps[0].tEnd) return steps[0].w;
+  for (let i = 1; i < steps.length; i++) {
+    if (steps[i].tEnd >= t) {
+      const prev = steps[i - 1], curr = steps[i];
+      const frac = (t - prev.tEnd) / (curr.tEnd - prev.tEnd);
+      return prev.w + frac * (curr.w - prev.w);
+    }
+  }
+  return steps[steps.length - 1].w;
+}
+
+// ─── DETECT NI LT2 ───
+// 1) Try the HR deflection point. 2) Fall back to the time-based estimate
+//    (~6:45 before the end of the test) if no clear deflection, or if the
+//    deflection lands somewhere implausible (too early or in the final step).
+function detectNILT2(steps) {
+  const totalTime = steps[steps.length - 1].tEnd;
+  const timeTarget = Math.max(0, totalTime - NI_LT2_TIME_BEFORE_END_MIN);
+  const timeEstimate = interpolatePowerAtTime(steps, timeTarget);
+
+  const defl = detectHRDeflection(steps);
+  if (defl) {
+    const beforeEnd = totalTime - defl.step.tEnd;
+    if (beforeEnd >= 2 && beforeEnd <= 12) {
+      return {
+        power: defl.step.w,
+        method: 'deflection',
+        deflection: defl,
+        timeBeforeEnd: beforeEnd,
+        timeEstimate
+      };
+    }
+  }
+  return { power: timeEstimate, method: 'time', deflection: defl, timeBeforeEnd: totalTime - timeTarget, timeEstimate };
+}
+
+// ─── MAIN CALCULATION ───
+function calculateAll() {
+  const maxHR = parseFloat(document.getElementById('max-hr').value) || 190;
+  const weightKg = getWeightKg();
+  const z7CeilingPct = (parseFloat(document.getElementById('z7-ceiling').value) || 150) / 100;
+
+  let lt1Power, lt2Power, peakPower;
+  let lt1HR, lt2HR;
+  let steps = null;
+  let showCurve = false;
+  let niResult = null;
+
+  if (currentMode === 'ni') {
+    steps = readNIStepData();
+    if (steps.length < 4) { alert('Please enter at least 4 valid steps (power, duration, and heart rate).'); return; }
+
+    // Auto-detect LT2 via HR deflection (time-based fallback), LT1 as % of LT2
+    niResult = detectNILT2(steps);
+    lt2Power = niResult.power;
+    lt1Power = lt2Power * tierConfig[athleteType].pwr;
+
+    // Overrides
+    if (document.getElementById('override-ni-lt1').checked) {
+      const ov = parseFloat(document.getElementById('override-ni-lt1-val').value);
+      if (ov > 0) lt1Power = ov;
+    }
+    if (document.getElementById('override-ni-lt2').checked) {
+      const ov = parseFloat(document.getElementById('override-ni-lt2-val').value);
+      if (ov > 0) {
+        lt2Power = ov;
+        // LT1 follows the overridden LT2 unless LT1 is also overridden
+        if (!document.getElementById('override-ni-lt1').checked) lt1Power = lt2Power * tierConfig[athleteType].pwr;
+      }
+    }
+
+    // HR from test data interpolation
+    lt1HR = interpolateHRAtPower(steps, lt1Power);
+    lt2HR = interpolateHRAtPower(steps, lt2Power);
+
+    peakPower = lt2Power * z7CeilingPct;
+    showCurve = true;
+
+  } else if (currentMode === 'test') {
+    steps = readStepData();
+    if (steps.length < 3) { alert('Please enter at least 3 valid step data points.'); return; }
+
+    const baseline = parseFloat(document.getElementById('baseline-lac').value) || 1.0;
+
+    // Auto-detect
+    lt1Power = detectLT1(steps, baseline);
+    lt2Power = detectLT2(steps);
+
+    // Overrides
+    if (document.getElementById('override-lt1').checked) {
+      const ov = parseFloat(document.getElementById('override-lt1-val').value);
+      if (ov > 0) lt1Power = ov;
+    }
+    if (document.getElementById('override-lt2').checked) {
+      const ov = parseFloat(document.getElementById('override-lt2-val').value);
+      if (ov > 0) lt2Power = ov;
+    }
+
+    // HR from test data interpolation
+    lt1HR = interpolateHRAtPower(steps, lt1Power);
+    lt2HR = interpolateHRAtPower(steps, lt2Power);
+
+    peakPower = lt2Power * z7CeilingPct;
+    showCurve = true;
+
+  } else if (currentMode === 'manual') {
+    lt1Power = parseFloat(document.getElementById('man-lt1-power').value) || 120;
+    lt2Power = parseFloat(document.getElementById('man-lt2-power').value) || 175;
+    peakPower = parseFloat(document.getElementById('man-peak-power').value) || (lt2Power * z7CeilingPct);
+    lt1HR = parseFloat(document.getElementById('man-lt1-hr').value) || (maxHR * 0.75);
+    lt2HR = parseFloat(document.getElementById('man-lt2-hr').value) || (maxHR * 0.88);
+
+  } else { // lt2only
+    lt2Power = parseFloat(document.getElementById('lt2only-power').value) || 175;
+    lt2HR = parseFloat(document.getElementById('lt2only-hr').value) || (maxHR * 0.88);
+
+    const tier = tierConfig[athleteType];
+    lt1Power = lt2Power * tier.pwr;
+    lt1HR = lt2HR * tier.hr;
+    peakPower = lt2Power * z7CeilingPct;
+  }
+
+  // Ensure sanity
+  if (lt1Power >= lt2Power) lt1Power = lt2Power * 0.75;
+  if (peakPower <= lt2Power) peakPower = lt2Power * z7CeilingPct;
+
+  // ── Build lactate curve ──
+  if (showCurve && steps) {
+    const isNI = currentMode === 'ni';
+    document.getElementById('curve-title').textContent = isNI ? 'Heart Rate Curve & Threshold Detection' : 'Lactate Curve & Threshold Detection';
+    if (isNI) buildHRCurve(steps, lt1Power, lt2Power, niResult);
+    else buildLactateCurve(steps, lt1Power, lt2Power);
+    document.getElementById('sec-curve').style.display = '';
+
+    let lt1Label = 'LT1 Power', lt2Label = 'LT2 Power (OBLA 4.0 mmol)', methodBox = '';
+    if (isNI) {
+      const tierPct = Math.round(tierConfig[athleteType].pwr * 100);
+      lt1Label = document.getElementById('override-ni-lt1').checked ? 'LT1 Power (Override)' : `LT1 Power (${tierPct}% of LT2)`;
+      const totalTime = steps[steps.length - 1].tEnd;
+      if (document.getElementById('override-ni-lt2').checked) {
+        lt2Label = 'LT2 Power (Override)';
+        methodBox = `<div class="result-box"><div class="result-label">Detection Method</div><div class="result-value" style="font-size:1.3rem;">Manual Override</div><div class="result-detail">Auto-detect suggested ${Math.round(niResult.power)} W (${niResult.method === 'deflection' ? 'HR deflection' : 'time-based estimate'})</div></div>`;
+      } else if (niResult.method === 'deflection') {
+        lt2Label = 'LT2 Power (HR Deflection)';
+        methodBox = `<div class="result-box"><div class="result-label">Detection Method</div><div class="result-value" style="font-size:1.3rem;">HR Deflection Point</div><div class="result-detail">Step ${niResult.deflection.index + 1} · ${fmtTime(niResult.timeBeforeEnd)} before test end (${fmtTime(totalTime)} total) · time-based estimate would be ${Math.round(niResult.timeEstimate)} W</div></div>`;
+      } else {
+        lt2Label = 'LT2 Power (Time Estimate)';
+        methodBox = `<div class="result-box alert"><div class="result-label">Detection Method</div><div class="result-value" style="font-size:1.3rem;">Time-Based Estimate</div><div class="result-detail">No clear HR deflection found. LT2 set at ${fmtTime(NI_LT2_TIME_BEFORE_END_MIN)} before test end (${fmtTime(totalTime)} total). Use the override if you know the deflection point.</div></div>`;
+      }
+    }
+
+    // Threshold summary inside curve section
+    document.getElementById('threshold-summary').innerHTML = `
+      <div class="result-box good">
+        <div class="result-label">${lt1Label}</div>
+        <div class="result-value">${Math.round(lt1Power)} W</div>
+        <div class="result-detail">${round1(lt1Power / weightKg)} W/kg · HR ≈ ${Math.round(lt1HR)} bpm</div>
+      </div>
+      <div class="result-box warn">
+        <div class="result-label">${lt2Label}</div>
+        <div class="result-value">${Math.round(lt2Power)} W</div>
+        <div class="result-detail">${round1(lt2Power / weightKg)} W/kg · HR ≈ ${Math.round(lt2HR)} bpm</div>
+      </div>
+      ${methodBox}
+      <div class="result-box">
+        <div class="result-label">Aerobic Range (LT2 − LT1)</div>
+        <div class="result-value">${Math.round(lt2Power - lt1Power)} W</div>
+        <div class="result-detail">${round1((lt2Power - lt1Power) / weightKg)} W/kg spread</div>
+      </div>
+    `;
+  } else {
+    document.getElementById('sec-curve').style.display = 'none';
+  }
+
+  // ── Summary section ──
+  document.getElementById('sec-summary').style.display = '';
+  document.getElementById('summary-badge').textContent = showCurve ? '4' : '3';
+  document.getElementById('zones-badge').textContent = showCurve ? '5' : '4';
+  document.getElementById('summary-boxes').innerHTML = `
+    <div class="result-box good">
+      <div class="result-label">LT1 Power</div>
+      <div class="result-value">${Math.round(lt1Power)} W</div>
+      <div class="result-detail">${round1(lt1Power / weightKg)} W/kg</div>
+    </div>
+    <div class="result-box warn">
+      <div class="result-label">LT2 / FTP Power</div>
+      <div class="result-value">${Math.round(lt2Power)} W</div>
+      <div class="result-detail">${round1(lt2Power / weightKg)} W/kg</div>
+    </div>
+    <div class="result-box">
+      <div class="result-label">LT1 Heart Rate</div>
+      <div class="result-value">${Math.round(lt1HR)} bpm</div>
+    </div>
+    <div class="result-box">
+      <div class="result-label">LT2 Heart Rate</div>
+      <div class="result-value">${Math.round(lt2HR)} bpm</div>
+    </div>
+    <div class="result-box">
+      <div class="result-label">Max Heart Rate</div>
+      <div class="result-value">${Math.round(maxHR)} bpm</div>
+    </div>
+    <div class="result-box">
+      <div class="result-label">Body Weight</div>
+      <div class="result-value">${round1(weightKg)} kg</div>
+    </div>
+  `;
+
+  // ── Build zones ──
+  const zones = buildZoneBoundaries(lt1Power, lt2Power, peakPower, lt1HR, lt2HR, maxHR);
+  buildZoneSpectrum(zones, lt1Power, lt2Power);
+  buildZoneTable(zones, weightKg, lt2Power);
+
+  document.getElementById('sec-zones').style.display = '';
+
+  // Scroll
+  setTimeout(() => {
+    const target = showCurve ? 'sec-curve' : 'sec-summary';
+    document.getElementById(target).scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 200);
+}
+
+// ─── ZONE BOUNDARIES ───
+function buildZoneBoundaries(lt1P, lt2P, peakP, lt1HR, lt2HR, maxHR) {
+  // Power zones
+  const pZ = [
+    { low: lt1P * 0.80, high: lt1P * 0.90 },  // Z1
+    { low: lt1P * 0.90, high: lt1P },            // Z2
+    { low: lt1P, high: (lt1P + lt2P) / 2 },      // Z3
+    { low: (lt1P + lt2P) / 2, high: lt2P },       // Z4
+    { low: lt2P, high: lt2P * 1.07 },             // Z5
+    { low: lt2P * 1.07, high: lt2P * 1.18 },      // Z6
+    { low: lt2P * 1.18, high: peakP }             // Z7
+  ];
+
+  // HR zones - proportional mapping
+  const hrAbove = maxHR - lt2HR;
+  const hZ = [
+    { low: lt1HR * 0.80, high: lt1HR * 0.90 },
+    { low: lt1HR * 0.90, high: lt1HR },
+    { low: lt1HR, high: (lt1HR + lt2HR) / 2 },
+    { low: (lt1HR + lt2HR) / 2, high: lt2HR },
+    { low: lt2HR, high: lt2HR + hrAbove * 0.30 },
+    { low: lt2HR + hrAbove * 0.30, high: lt2HR + hrAbove * 0.65 },
+    { low: lt2HR + hrAbove * 0.65, high: maxHR }
+  ];
+
+  return pZ.map((p, i) => ({
+    power: p,
+    hr: hZ[i],
+    rpe: rpeRanges[i]
+  }));
+}
+
+// ─── ZONE SPECTRUM BAR ───
+function buildZoneSpectrum(zones, lt1P, lt2P) {
+  const container = document.getElementById('zone-spectrum');
+  const labels = document.getElementById('spectrum-labels');
+  const totalRange = zones[6].power.high - zones[0].power.low;
+  container.innerHTML = '';
+  let labelHTML = `<span>${Math.round(zones[0].power.low)}W</span>`;
+
+  zones.forEach((z, i) => {
+    const width = ((z.power.high - z.power.low) / totalRange) * 100;
+    container.innerHTML += `<div class="zone-spectrum-segment" style="flex-grow:${width}; background:${zoneColorHex[i]};" title="Z${i+1}: ${Math.round(z.power.low)}–${Math.round(z.power.high)}W">Z${i+1}</div>`;
+  });
+  labelHTML += `<span>LT1 ${Math.round(lt1P)}W</span><span>LT2 ${Math.round(lt2P)}W</span><span>${Math.round(zones[6].power.high)}W</span>`;
+  labels.innerHTML = labelHTML;
+}
+
+// ─── ZONE PERCENTAGES (% of LT2 / FTP, non-overlapping for TrainingPeaks) ───
+// Each zone's top is rounded from its power ceiling; the next zone starts
+// one percentage point above it so no two zones share a number.
+function buildZonePercentages(zones, lt2Power) {
+  const out = [];
+  let prevHigh = null;
+  zones.forEach((z, i) => {
+    let low = prevHigh === null ? Math.round(z.power.low / lt2Power * 100) : prevHigh + 1;
+    let high = Math.round(z.power.high / lt2Power * 100);
+    if (high < low) high = low;
+    out.push({ low, high });
+    prevHigh = high;
+  });
+  return out;
+}
+
+// ─── ZONE TABLE ───
+function buildZoneTable(zones, weightKg, lt2Power) {
+  const container = document.getElementById('zone-chart');
+  const pct = buildZonePercentages(zones, lt2Power);
+  let html = `<div class="zone-header-row">
+    <div>Zone</div><div>Description & Physiological Benefits</div>
+    <div>% of LT2 / FTP</div><div>Power (W)</div><div>Heart Rate</div><div>W/kg</div><div>RPE</div>
+  </div>`;
+
+  for (let i = 0; i < 7; i++) {
+    // Threshold dividers
+    if (i === 2) {
+      html += `<div class="threshold-divider"><span class="threshold-label">▲ LT1 — ${Math.round(zones[2].power.low)} W</span></div>`;
+    }
+    if (i === 4) {
+      html += `<div class="threshold-divider"><span class="threshold-label">▲ LT2 — ${Math.round(zones[4].power.low)} W</span></div>`;
+    }
+
+    const z = zones[i];
+    const zd = zoneData[i];
+    const wkgLow = round1(z.power.low / weightKg);
+    const wkgHigh = round1(z.power.high / weightKg);
+
+    html += `<div class="zone-row">
+      <div class="zone-badge-cell"><div class="zone-badge" style="background:${zoneColorHex[i]};">Z${i+1}</div></div>
+      <div class="zone-desc-cell">
+        <div class="zone-name">${zd.name}</div>
+        <div class="zone-explanation">${zd.explanation}</div>
+        <div class="mobile-metrics" style="margin-top:0.3rem; font-family:'Barlow Condensed',sans-serif; font-weight:600; font-size:0.85rem; color:var(--usa-navy);">
+          ${pct[i].low}–${pct[i].high}% FTP &nbsp;|&nbsp;
+          ${Math.round(z.power.low)}–${Math.round(z.power.high)} W &nbsp;|&nbsp;
+          ${Math.round(z.hr.low)}–${Math.round(z.hr.high)} bpm &nbsp;|&nbsp;
+          ${wkgLow}–${wkgHigh} W/kg &nbsp;|&nbsp;
+          RPE ${z.rpe.low}–${z.rpe.high}
+        </div>
+      </div>
+      <div class="zone-metric-cell">${pct[i].low}–${pct[i].high}%</div>
+      <div class="zone-metric-cell">${Math.round(z.power.low)}–${Math.round(z.power.high)}</div>
+      <div class="zone-metric-cell">${Math.round(z.hr.low)}–${Math.round(z.hr.high)}</div>
+      <div class="zone-metric-cell">${wkgLow}–${wkgHigh}</div>
+      <div class="zone-metric-cell">${z.rpe.low}–${z.rpe.high}</div>
+    </div>`;
+  }
+  container.innerHTML = html;
+}
+
+// ─── LACTATE CURVE CHART ───
+function buildLactateCurve(steps, lt1Power, lt2Power) {
+  const ctx = document.getElementById('lactate-chart').getContext('2d');
+  if (lactateChart) lactateChart.destroy();
+
+  const powerLabels = steps.map(s => s.w);
+  const lacData = steps.map(s => s.lac);
+  const hrData = steps.map(s => s.hr || null);
+  const hasHR = hrData.some(h => h > 0);
+
+  const datasets = [
+    {
+      label: 'Lactate (mmol/L)',
+      data: lacData,
+      borderColor: '#E31837',
+      backgroundColor: 'rgba(227,24,55,0.08)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 6,
+      pointHoverRadius: 9,
+      pointBackgroundColor: '#E31837',
+      borderWidth: 3,
+      yAxisID: 'y'
+    }
+  ];
+  if (hasHR) {
+    datasets.push({
+      label: 'Heart Rate (bpm)',
+      data: hrData,
+      borderColor: '#4B7C9B',
+      backgroundColor: 'rgba(75,124,155,0.08)',
+      fill: false,
+      tension: 0.3,
+      pointRadius: 5,
+      pointHoverRadius: 8,
+      pointBackgroundColor: '#4B7C9B',
+      borderWidth: 2,
+      borderDash: [6, 3],
+      yAxisID: 'y1'
+    });
+  }
+
+  // Annotation lines for LT1 and LT2
+  const annotationPlugin = {
+    id: 'thresholdLines',
+    afterDraw(chart) {
+      const { ctx, chartArea, scales } = chart;
+      const xScale = scales.x;
+      const yScale = scales.y;
+
+      [{ power: lt1Power, label: 'LT1', color: '#6DBE45' }, { power: lt2Power, label: 'LT2', color: '#F0C808' }].forEach(t => {
+        const x = xScale.getPixelForValue(t.power);
+        if (x >= chartArea.left && x <= chartArea.right) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.setLineDash([6, 4]);
+          ctx.strokeStyle = t.color;
+          ctx.lineWidth = 2.5;
+          ctx.moveTo(x, chartArea.top);
+          ctx.lineTo(x, chartArea.bottom);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          // Label
+          ctx.fillStyle = t.color;
+          ctx.font = "bold 12px 'Barlow Condensed', sans-serif";
+          ctx.textAlign = 'center';
+          ctx.fillText(t.label + ' ' + Math.round(t.power) + 'W', x, chartArea.top - 6);
+          ctx.restore();
+        }
+      });
+
+      // 4.0 mmol horizontal line
+      const y4 = yScale.getPixelForValue(4.0);
+      if (y4 >= chartArea.top && y4 <= chartArea.bottom) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = 'rgba(240,200,8,0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(chartArea.left, y4);
+        ctx.lineTo(chartArea.right, y4);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#F0C808';
+        ctx.font = "11px 'Barlow Condensed', sans-serif";
+        ctx.textAlign = 'right';
+        ctx.fillText('4.0 mmol (OBLA)', chartArea.right - 4, y4 - 4);
+        ctx.restore();
+      }
+    }
+  };
+
+  const scales = {
+    x: {
+      type: 'linear',
+      title: { display: true, text: 'Power (Watts)', font: { family: "'Barlow Condensed', sans-serif", weight: 600, size: 13 }, color: '#0C2340' },
+      ticks: { font: { family: "'Source Sans 3', sans-serif", size: 11 } },
+      grid: { color: 'rgba(0,0,0,0.06)' }
+    },
+    y: {
+      type: 'linear',
+      position: 'left',
+      title: { display: true, text: 'Lactate (mmol/L)', font: { family: "'Barlow Condensed', sans-serif", weight: 600, size: 13 }, color: '#E31837' },
+      ticks: { font: { family: "'Source Sans 3', sans-serif", size: 11 }, color: '#E31837' },
+      grid: { color: 'rgba(0,0,0,0.06)' },
+      beginAtZero: true
+    }
+  };
+  if (hasHR) {
+    scales.y1 = {
+      type: 'linear',
+      position: 'right',
+      title: { display: true, text: 'Heart Rate (bpm)', font: { family: "'Barlow Condensed', sans-serif", weight: 600, size: 13 }, color: '#4B7C9B' },
+      ticks: { font: { family: "'Source Sans 3', sans-serif", size: 11 }, color: '#4B7C9B' },
+      grid: { drawOnChartArea: false }
+    };
+  }
+
+  lactateChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: powerLabels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { labels: { font: { family: "'Barlow Condensed', sans-serif", size: 12 }, usePointStyle: true } },
+        tooltip: {
+          backgroundColor: 'rgba(12,35,64,0.92)',
+          titleFont: { family: "'Barlow Condensed', sans-serif", size: 14, weight: 600 },
+          bodyFont: { family: "'Source Sans 3', sans-serif", size: 12 },
+          padding: 10,
+          cornerRadius: 6
+        }
+      },
+      scales
+    },
+    plugins: [annotationPlugin]
+  });
+}
+
+// ─── HEART RATE CURVE CHART (non-invasive mode) ───
+function buildHRCurve(steps, lt1Power, lt2Power, niResult) {
+  const ctx = document.getElementById('lactate-chart').getContext('2d');
+  if (lactateChart) lactateChart.destroy();
+
+  const hrPts = steps.map(s => ({ x: s.w, y: s.hr }));
+  const rpePts = steps.map(s => ({ x: s.w, y: s.rpe > 0 ? s.rpe : null }));
+  const hasRPE = steps.some(s => s.rpe > 0);
+
+  const datasets = [
+    {
+      label: 'Heart Rate (bpm)',
+      data: hrPts,
+      borderColor: '#4B7C9B',
+      backgroundColor: 'rgba(75,124,155,0.08)',
+      fill: true,
+      tension: 0.3,
+      pointRadius: 6,
+      pointHoverRadius: 9,
+      pointBackgroundColor: '#4B7C9B',
+      borderWidth: 3,
+      yAxisID: 'y',
+      order: 1
+    }
+  ];
+
+  // Show the two-segment fit so the deflection is visible
+  const defl = niResult && niResult.deflection;
+  if (defl) {
+    const lo = steps[0].w, mid = defl.step.w, hi = steps[steps.length - 1].w;
+    datasets.push({
+      label: 'Linear HR trend (below deflection)',
+      data: [{ x: lo, y: defl.lower.slope * lo + defl.lower.intercept }, { x: hi, y: defl.lower.slope * hi + defl.lower.intercept }],
+      borderColor: 'rgba(12,35,64,0.45)',
+      borderWidth: 1.5,
+      borderDash: [5, 5],
+      pointRadius: 0,
+      fill: false,
+      yAxisID: 'y',
+      order: 2
+    });
+    datasets.push({
+      label: 'HR trend (above deflection)',
+      data: [{ x: mid, y: defl.upper.slope * mid + defl.upper.intercept }, { x: hi, y: defl.upper.slope * hi + defl.upper.intercept }],
+      borderColor: 'rgba(227,24,55,0.55)',
+      borderWidth: 1.5,
+      borderDash: [5, 5],
+      pointRadius: 0,
+      fill: false,
+      yAxisID: 'y',
+      order: 2
+    });
+  }
+
+  if (hasRPE) {
+    datasets.push({
+      label: 'RPE (1-10)',
+      data: rpePts,
+      borderColor: '#F18F01',
+      backgroundColor: 'rgba(241,143,1,0.08)',
+      fill: false,
+      tension: 0.3,
+      pointRadius: 4,
+      pointHoverRadius: 7,
+      pointBackgroundColor: '#F18F01',
+      borderWidth: 2,
+      borderDash: [6, 3],
+      yAxisID: 'y1',
+      order: 3
+    });
+  }
+
+  const annotationPlugin = {
+    id: 'thresholdLinesHR',
+    afterDraw(chart) {
+      const { ctx, chartArea, scales } = chart;
+      const xScale = scales.x;
+      const lt2Label = niResult && niResult.method === 'deflection' && !document.getElementById('override-ni-lt2').checked ? 'LT2 (HR Deflection)' : 'LT2';
+      [{ power: lt1Power, label: 'LT1', color: '#6DBE45' }, { power: lt2Power, label: lt2Label, color: '#F0C808' }].forEach(t => {
+        const x = xScale.getPixelForValue(t.power);
+        if (x >= chartArea.left && x <= chartArea.right) {
+          ctx.save();
+          ctx.beginPath();
+          ctx.setLineDash([6, 4]);
+          ctx.strokeStyle = t.color;
+          ctx.lineWidth = 2.5;
+          ctx.moveTo(x, chartArea.top);
+          ctx.lineTo(x, chartArea.bottom);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = t.color;
+          ctx.font = "bold 12px 'Barlow Condensed', sans-serif";
+          ctx.textAlign = 'center';
+          ctx.fillText(t.label + ' ' + Math.round(t.power) + 'W', x, chartArea.top - 6);
+          ctx.restore();
+        }
+      });
+    }
+  };
+
+  const scales = {
+    x: {
+      type: 'linear',
+      title: { display: true, text: 'Power (Watts)', font: { family: "'Barlow Condensed', sans-serif", weight: 600, size: 13 }, color: '#0C2340' },
+      ticks: { font: { family: "'Source Sans 3', sans-serif", size: 11 } },
+      grid: { color: 'rgba(0,0,0,0.06)' }
+    },
+    y: {
+      type: 'linear',
+      position: 'left',
+      title: { display: true, text: 'Heart Rate (bpm)', font: { family: "'Barlow Condensed', sans-serif", weight: 600, size: 13 }, color: '#4B7C9B' },
+      ticks: { font: { family: "'Source Sans 3', sans-serif", size: 11 }, color: '#4B7C9B' },
+      grid: { color: 'rgba(0,0,0,0.06)' }
+    }
+  };
+  if (hasRPE) {
+    scales.y1 = {
+      type: 'linear',
+      position: 'right',
+      min: 0, max: 10,
+      title: { display: true, text: 'RPE (1-10)', font: { family: "'Barlow Condensed', sans-serif", weight: 600, size: 13 }, color: '#F18F01' },
+      ticks: { font: { family: "'Source Sans 3', sans-serif", size: 11 }, color: '#F18F01' },
+      grid: { drawOnChartArea: false }
+    };
+  }
+
+  lactateChart = new Chart(ctx, {
+    type: 'line',
+    data: { datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: { intersect: false, mode: 'nearest', axis: 'x' },
+      plugins: {
+        legend: { labels: { font: { family: "'Barlow Condensed', sans-serif", size: 12 }, usePointStyle: true } },
+        tooltip: {
+          backgroundColor: 'rgba(12,35,64,0.92)',
+          titleFont: { family: "'Barlow Condensed', sans-serif", size: 14, weight: 600 },
+          bodyFont: { family: "'Source Sans 3', sans-serif", size: 12 },
+          padding: 10,
+          cornerRadius: 6,
+          callbacks: { title: items => items.length ? items[0].parsed.x + ' W' : '' }
+        }
+      },
+      scales
+    },
+    plugins: [annotationPlugin]
+  });
+}
+
+// ─── INIT ───
+buildStepTable();
+buildNIStepTable();
+</script>
+</body>
+</html>
